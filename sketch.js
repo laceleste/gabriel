@@ -2,6 +2,7 @@ var bg, bgImg;
 var player, shooterImg, shooter_shooting;
 var gamestate = 1;
 var play;
+var count = 3;
 function preload() {
   playImg = loadImage("assets/start.png");
   cenario1 = loadImage("assets/cenario1.png");
@@ -11,27 +12,52 @@ function preload() {
   foxy = loadImage("assets/foxy.png");
   glich = loadImage("assets/glich.png");
   freddy = loadImage("assets/freddy.png");
+  sonic = loadImage("assets/sonic.gif");
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-
   player = createSprite(displayWidth - 1150, displayHeight - 300, 50, 50);
-  // player.addImage(shooterImg);
-  // player.scale = 0.3;
-  player.debug = true;
-  player.setCollider("rectangle", 0, 0, 300, 300);
-
+  player.addImage(sonic);
+  player.scale = 1.5;
+  player.setCollider("rectangle", 0, 0, 150, 150);
+  start = createSprite(width / 2, height / 2);
+  start.addImage(playImg);
+  start.scale = 5;
   animatronicGroup = new Group();
 }
 
 function draw() {
-  image(cenario1, 0, 0, windowWidth, windowHeight);
+  if (gamestate === 1) {
+    player.visible = false;
+    image(cenario2, 0, 0, windowWidth, windowHeight);
+    start.visible = true;
+    if (mousePressedOver(start)) {
+      start.visible = false;
+      gamestate = 2;
+    }
+  } else if (gamestate === 2) {
+    player.visible = true;
+    image(cenario1, 0, 0, windowWidth, windowHeight);
+    if (player.isTouching(animatronicGroup)) {
+      for (var i = 0; i < animatronicGroup.length; i++) {
+        if (animatronicGroup[i].isTouching(player)) {
+          count -= 1;
+          player.x = displayWidth - 1150;
+        }
+      }
+      if (count === 0) {
+        count=3
+        gamestate = 1;
+        player.visible = false;
+        animatronicGroup.destroyEach();
+      }
+    }
 
- 
-  animatronicspawn()
- 
+    animatronicspawn();
+    player.visible = true;
+  }
+
   if (keyDown("UP_ARROW") || touches.length > 0) {
     player.y = player.y - 30;
   }
@@ -44,6 +70,9 @@ function draw() {
   if (keyDown("LEFT_ARROW") || touches.length > 0) {
     player.x = player.x - 30;
   }
+
+  textSize(70);
+  text("VIDAS: " + count, windowWidth - 1150, windowHeight / 8);
   drawSprites();
 }
 
